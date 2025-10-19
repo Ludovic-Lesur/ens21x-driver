@@ -1,7 +1,7 @@
 /*
  * ens21x.c
  *
- *  Created on: 27 aug. 2024
+ *  Created on: 19 oct. 2025
  *      Author: Ludo
  */
 
@@ -99,7 +99,7 @@ ENS21X_status_t ENS21X_get_temperature_humidity(uint8_t i2c_address, int32_t* te
     }
     // Compute temperature.
     data_16bits = (uint16_t) ((measure_buf[1] << 8) + measure_buf[0]);
-    tmp_float = ((((float) (data_16bits)) / (ENS21X_TEMPERATURE_SLOPE)) - ENS21X_TEMPERATURE_KELVIN_OFFSET);
+    tmp_float = ((((float) data_16bits) / ((float) ENS21X_TEMPERATURE_SLOPE)) - ((float) ENS21X_TEMPERATURE_KELVIN_OFFSET));
     (*temperature_tenth_degrees) = (int32_t) (tmp_float * ENS21X_TEMPERATURE_FACTOR);
     // Check humidity validity flag.
     if ((measure_buf[5] & 0x01) == 0) {
@@ -108,7 +108,7 @@ ENS21X_status_t ENS21X_get_temperature_humidity(uint8_t i2c_address, int32_t* te
     }
     // Compute humidity.
     data_16bits = (uint16_t) ((measure_buf[4] << 8) + measure_buf[3]);
-    tmp_float = (((float) (data_16bits)) / (ENS21X_HUMIDITY_SLOPE));
+    tmp_float = (((float) data_16bits) / ((float) ENS21X_HUMIDITY_SLOPE));
     (*humidity_percent) = (int32_t) (tmp_float * ENS21X_HUMIDITY_FACTOR);
 errors:
     return status;
