@@ -1,0 +1,16 @@
+/*
+ * ens21x_driver_flags.h
+ *
+ *  Created on: 19 oct. 2025
+ *      Author: Ludo
+ */
+
+#ifndef __ENS21X_DRIVER_FLAGS_H__
+#define __ENS21X_DRIVER_FLAGS_H__
+
+/*** ENS21X driver compilation flags ***/
+
+#define ENS21X_DRIVER_I2C_ERROR_BASE_LAST       0
+#define ENS21X_DRIVER_DELAY_ERROR_BASE_LAST     0
+
+#endif /* __ENS21X_DRIVER_FLAGS_H__ */
