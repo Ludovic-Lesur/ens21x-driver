@@ -22,12 +22,11 @@
 
 #define ENS21X_CONVERSION_TIME_MS           150
 
-#define ENS21X_TEMPERATURE_SLOPE            64.0
-#define ENS21X_TEMPERATURE_KELVIN_OFFSET    273.15
-#define ENS21X_TEMPERATURE_FACTOR           10.0
+#define ENS21X_TEMPERATURE_SLOPE            64
+#define ENS21X_TEMPERATURE_OFFSET           174816
+#define ENS21X_TEMPERATURE_FACTOR           10
 
-#define ENS21X_HUMIDITY_SLOPE               512.0
-#define ENS21X_HUMIDITY_FACTOR              1.0
+#define ENS21X_HUMIDITY_SLOPE               512
 
 /*** ENS21x local structures ***/
 
@@ -74,8 +73,7 @@ ENS21X_status_t ENS21X_get_temperature_humidity(uint8_t i2c_address, int32_t* te
     uint8_t measure_command[ENS21X_MEASURE_COMMAND_BUFFER_SIZE] = { ENS21X_REGISTER_SENS_START, 0x03 };
     uint8_t measure_buf[ENS21X_MEASURE_DATA_BUFFER_SIZE] = { 0x00 };
     uint8_t data_register_address = ENS21X_REGISTER_T_VAL;
-    uint16_t data_16bits = 0;
-    float tmp_float = 0.0;
+    int32_t data_16bits = 0;
     // Check parameters.
     if ((temperature_tenth_degrees == NULL) || (humidity_percent == NULL)) {
         status = ENS21X_ERROR_NULL_PARAMETER;
@@ -98,18 +96,16 @@ ENS21X_status_t ENS21X_get_temperature_humidity(uint8_t i2c_address, int32_t* te
         goto errors;
     }
     // Compute temperature.
-    data_16bits = (uint16_t) ((measure_buf[1] << 8) + measure_buf[0]);
-    tmp_float = ((((float) data_16bits) / ((float) ENS21X_TEMPERATURE_SLOPE)) - ((float) ENS21X_TEMPERATURE_KELVIN_OFFSET));
-    (*temperature_tenth_degrees) = (int32_t) (tmp_float * ENS21X_TEMPERATURE_FACTOR);
+    data_16bits = (int32_t) ((measure_buf[1] << 8) + measure_buf[0]);
+    (*temperature_tenth_degrees) = (((data_16bits * ENS21X_TEMPERATURE_FACTOR) - ENS21X_TEMPERATURE_OFFSET) / (ENS21X_TEMPERATURE_SLOPE));
     // Check humidity validity flag.
     if ((measure_buf[5] & 0x01) == 0) {
         status = ENS16X_ERROR_HUMIDITY_TIMEOUT;
         goto errors;
     }
     // Compute humidity.
-    data_16bits = (uint16_t) ((measure_buf[4] << 8) + measure_buf[3]);
-    tmp_float = (((float) data_16bits) / ((float) ENS21X_HUMIDITY_SLOPE));
-    (*humidity_percent) = (int32_t) (tmp_float * ENS21X_HUMIDITY_FACTOR);
+    data_16bits = (int32_t) ((measure_buf[4] << 8) + measure_buf[3]);
+    (*humidity_percent) = (data_16bits / ENS21X_HUMIDITY_SLOPE);
 errors:
     return status;
 }
